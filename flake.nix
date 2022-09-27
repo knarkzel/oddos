@@ -33,7 +33,7 @@
         pkgs = import nixpkgs {inherit overlays system;};
       in rec {
         devShell = pkgs.mkShell {
-          buildInputs = [pkgs.zigpkgs.master];
+          buildInputs = [pkgs.zigpkgs.default pkgs.qemu];
         };
       }
     );
