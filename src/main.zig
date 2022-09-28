@@ -23,7 +23,7 @@ const stack_bytes_slice = stack_bytes[0..];
 
 export fn _start() callconv(.Naked) noreturn {
     // Enable interrupts
-    asm volatile ("sti");
+    // asm volatile ("sti");
 
     // Call main function
     @call(.{ .stack = stack_bytes_slice }, main, .{});
