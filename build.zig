@@ -25,6 +25,8 @@ pub fn build(b: *std.build.Builder) !void {
         "qemu-system-i386",
         "-kernel",
         "zig-out/bin/oddos.elf",
+        "-display",
+        "gtk,zoom-to-fit=on",
     });
     run_cmd.step.dependOn(kernel_step);
 
