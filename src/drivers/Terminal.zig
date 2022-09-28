@@ -1,4 +1,4 @@
-const Port = @import("Port.zig").Port;
+const Port = @import("../utils/Port.zig").Port;
 
 const VGA_WIDTH = 80;
 const VGA_HEIGHT = 25;

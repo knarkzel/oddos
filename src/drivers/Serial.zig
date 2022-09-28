@@ -1,4 +1,4 @@
-const Port = @import("Port.zig").Port;
+const Port = @import("../utils/Port.zig").Port;
 
 const base = 0x3F8;
 const data = Port(u8).init(base);

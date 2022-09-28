@@ -24,8 +24,8 @@ const stack_bytes_slice = stack_bytes[0..];
 
 export fn _start() callconv(.Naked) noreturn {
     // Init functions
-    Terminal.init();
     Serial.init();
+    Terminal.init();
 
     // Call main function
     @call(.{ .stack = stack_bytes_slice }, main, .{});
@@ -49,5 +49,4 @@ fn main() void {
     Terminal.write("oddos ");
     Terminal.setColor(.White, .Black);
     Terminal.write("> ");
-    Serial.write("hello there");
 }

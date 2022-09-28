@@ -29,6 +29,7 @@ pub fn build(b: *std.build.Builder) !void {
         "gtk,zoom-to-fit=on",
         "-serial",
         "stdio",
+        "-s",
     });
     run_cmd.step.dependOn(kernel_step);
 
@@ -47,4 +48,13 @@ pub fn build(b: *std.build.Builder) !void {
     cfg_cmd.step.dependOn(&elf_cmd.step);
     elf_cmd.step.dependOn(&dir_cmd.step);
     dir_cmd.step.dependOn(kernel_step);
+
+    // Gdb step
+    const gdb_cmd = b.addSystemCommand(&.{
+        "gdb",
+        "--args",
+        "zig-out/bin/oddos.elf",
+    });
+    const gdb_step = b.step("gdb", "Start gdb on kernel");
+    gdb_step.dependOn(&gdb_cmd.step);
 }
