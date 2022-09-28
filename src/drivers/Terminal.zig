@@ -7,8 +7,8 @@ var row: usize = 0;
 var column: usize = 0;
 var color = vgaEntryColor(.White, .Black);
 const buffer = @intToPtr([*]volatile u16, 0xB8000);
-const vga_board = Port(u8).open(0x3D4);
-const vga_data = Port(u8).open(0x3D5);
+const vga_board = Port(u8).init(0x3D4);
+const vga_data = Port(u8).init(0x3D5);
 
 pub const VgaColor = enum(u8) {
     Black = 0,

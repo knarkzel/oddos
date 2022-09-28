@@ -23,8 +23,9 @@ export var stack_bytes: [16 * 1024]u8 align(16) linksection(".bss") = undefined;
 const stack_bytes_slice = stack_bytes[0..];
 
 export fn _start() callconv(.Naked) noreturn {
-    // Enable interrupts
-    // asm volatile ("sti");
+    // Init functions
+    Terminal.init();
+    Serial.init();
 
     // Call main function
     @call(.{ .stack = stack_bytes_slice }, main, .{});
@@ -44,9 +45,9 @@ pub fn panic(msg: []const u8, _: ?*std.builtin.StackTrace) noreturn {
 
 // Main starts here
 fn main() void {
-    Terminal.init();
     Terminal.setColor(.Green, .Black);
     Terminal.write("oddos ");
     Terminal.setColor(.White, .Black);
     Terminal.write("> ");
+    Serial.write("hello there");
 }

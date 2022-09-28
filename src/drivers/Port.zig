@@ -2,7 +2,7 @@ pub fn Port(comptime T: type) type {
     return struct {
         port: u16,
 
-        pub fn open(port: u16) @This() {
+        pub fn init(port: u16) @This() {
             return .{
                 .port = port,
             };
