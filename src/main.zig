@@ -40,5 +40,5 @@ fn main() void {
     Terminal.setColor(.LightBlue, .Black);
     Terminal.write("> ");
     Terminal.setColor(.White, .Black);
-    Terminal.moveCursor(2, 2);
+    // Terminal.moveCursor(2, 2);
 }

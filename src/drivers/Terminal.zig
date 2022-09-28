@@ -41,6 +41,7 @@ pub fn write(data: []const u8) void {
             column = 0;
             row += 1;
         } else putChar(c);
+    moveCursor(@intCast(u16, column), @intCast(u16, row));
 }
 
 pub fn vgaEntryColor(fg: VgaColor, bg: VgaColor) u8 {
