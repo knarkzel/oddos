@@ -37,10 +37,7 @@ pub fn initialize() void {
 
 pub fn write(data: []const u8) void {
     for (data) |c|
-        if (c == '\n') {
-            column = 0;
-            row += 1;
-        } else putChar(c);
+        if (c == '\n') newLine() else putChar(c);
     moveCursor(@intCast(u16, column), @intCast(u16, row));
 }
 
@@ -85,10 +82,34 @@ fn putCharAt(c: u8, new_color: u8, x: usize, y: usize) void {
 fn putChar(c: u8) void {
     putCharAt(c, color, column, row);
     column += 1;
-    if (column == VGA_WIDTH) {
+    if (column == VGA_WIDTH)
+        newLine();
+}
+
+fn newLine() void {
+    column = 0;
+    row += 1;
+    if (row == VGA_HEIGHT) {
+        moveLinesUp();
         column = 0;
-        row += 1;
-        if (row == VGA_HEIGHT)
-            row = 0;
+        row -= 1;
     }
+}
+
+fn moveLinesUp() void {
+    var y: usize = 1;
+    while (y < VGA_HEIGHT) : (y += 1) {
+        var x: usize = 0;
+        while (x < VGA_WIDTH) : (x += 1) {
+            const letter = buffer[y * VGA_WIDTH + x];
+            buffer[(y - 1) * VGA_WIDTH + x] = letter;
+        }
+    }
+    clearRow();
+}
+
+fn clearRow() void {
+    var x: usize = 0;
+    while (x < VGA_WIDTH) : (x += 1)
+        putCharAt(' ', color, x, row - 1);
 }

@@ -36,9 +36,7 @@ pub fn panic(msg: []const u8, _: ?*std.builtin.StackTrace) noreturn {
 fn main() void {
     Terminal.initialize();
     Terminal.setColor(.Green, .Black);
-    Terminal.write("[oddos]\n\n");
-    Terminal.setColor(.LightBlue, .Black);
-    Terminal.write("> ");
+    Terminal.write("oddos ");
     Terminal.setColor(.White, .Black);
-    // Terminal.moveCursor(2, 2);
+    Terminal.write("> ");
 }
