@@ -27,6 +27,8 @@ pub fn build(b: *std.build.Builder) !void {
         "zig-out/bin/oddos.elf",
         "-display",
         "gtk,zoom-to-fit=on",
+        "-serial",
+        "stdio",
     });
     run_cmd.step.dependOn(kernel_step);
 

@@ -1,3 +1,5 @@
+const Port = @import("Port.zig").Port;
+
 const VGA_WIDTH = 80;
 const VGA_HEIGHT = 25;
 
@@ -5,6 +7,8 @@ var row: usize = 0;
 var column: usize = 0;
 var color = vgaEntryColor(.White, .Black);
 const buffer = @intToPtr([*]volatile u16, 0xB8000);
+const vga_board = Port(u8).open(0x3D4);
+const vga_data = Port(u8).open(0x3D5);
 
 pub const VgaColor = enum(u8) {
     Black = 0,
@@ -25,7 +29,7 @@ pub const VgaColor = enum(u8) {
     White = 15,
 };
 
-pub fn initialize() void {
+pub fn init() void {
     var y: usize = 0;
     while (y < VGA_HEIGHT) : (y += 1) {
         var x: usize = 0;
@@ -50,24 +54,42 @@ pub fn setColor(fg: VgaColor, bg: VgaColor) void {
 }
 
 pub fn disableCursor() void {
-    outb(0x3D4, 0x0A);
-    outb(0x3D5, 0x20);
+    vga_board.write(0x0A);
+    vga_data.write(0x20);
 }
 
+/// start is row where cursor starts, end is row where cursor ends
+pub fn enableCursor(start: u8, end: u8) void {
+    vga_board.write(0x0A);
+    vga_data.write(vga_data.read() & 0xC0 | start);
+    vga_board.write(0x0B);
+    vga_data.write(vga_data.read() & 0xE0 | end);
+}
+
+/// x is column, y is row
 pub fn moveCursor(x: u16, y: u16) void {
     const position = y * VGA_WIDTH + x;
-    outb(0x3D4, 0x0F);
-    outb(0x3D5, @intCast(u8, (position & 0xFF)));
-    outb(0x3D4, 0x0E);
-    outb(0x3D5, @intCast(u8, (position >> 8) & 0xFF));
+    vga_board.write(0x0F);
+    vga_data.write(@intCast(u8, (position & 0xFF)));
+    vga_board.write(0x0E);
+    vga_data.write(@intCast(u8, (position >> 8) & 0xFF));
 }
 
-fn outb(port: u16, value: u8) void {
-    asm volatile ("outb %[value], %[port]"
-        :
-        : [port] "N{dx}" (port),
-          [value] "{al}" (value),
-    );
+const Position = struct {
+    x: u16,
+    y: u16,
+};
+
+pub fn getCursor() Position {
+    var position: u16 = 0;
+    vga_board.write(0x0F);
+    position |= vga_data.read();
+    vga_board.write(0x0E);
+    position |= @as(u16, vga_data.read()) << 8;
+    return .{
+        .x = position % VGA_WIDTH,
+        .y = position / VGA_WIDTH,
+    };
 }
 
 fn vgaEntry(uc: u8, new_color: u8) u16 {

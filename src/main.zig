@@ -1,4 +1,5 @@
 const std = @import("std");
+const Serial = @import("drivers/Serial.zig");
 const Terminal = @import("drivers/Terminal.zig");
 
 const MultiBoot = packed struct {
@@ -41,8 +42,9 @@ pub fn panic(msg: []const u8, _: ?*std.builtin.StackTrace) noreturn {
         asm volatile ("hlt");
 }
 
+// Main starts here
 fn main() void {
-    Terminal.initialize();
+    Terminal.init();
     Terminal.setColor(.Green, .Black);
     Terminal.write("oddos ");
     Terminal.setColor(.White, .Black);
