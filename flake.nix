@@ -36,8 +36,8 @@
       system: let
         pkgs = import nixpkgs {inherit overlays system;};
       in rec {
-        devShell = pkgs.mkShell {
-          buildInputs = [pkgs.zigpkgs.default pkgs.qemu];
+        devShell = with pkgs; pkgs.mkShell {
+          buildInputs = [zigpkgs.default qemu grub xorriso ];
         };
       }
     );

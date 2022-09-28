@@ -9,7 +9,7 @@ pub fn build(b: *std.build.Builder) !void {
     };
     const mode = b.standardReleaseOptions();
 
-    const kernel = b.addExecutable("kernel.elf", "src/main.zig");
+    const kernel = b.addExecutable("oddos.elf", "src/main.zig");
     kernel.setTarget(target);
     kernel.setBuildMode(mode);
     kernel.setLinkerScriptPath(.{ .path = "src/linker.ld" });
@@ -22,7 +22,7 @@ pub fn build(b: *std.build.Builder) !void {
     const run_cmd = b.addSystemCommand(&.{
         "qemu-system-i386",
         "-kernel",
-        "zig-out/bin/kernel.elf",
+        "zig-out/bin/oddos.elf",
     });
     run_cmd.step.dependOn(kernel_step);
 
