@@ -1,6 +1,6 @@
 # oddos
 
-```
+```shell
 git clone git@git.sr.ht:~knarkzel/oddos
 cd oddos
 nix develop
