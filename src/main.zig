@@ -22,15 +22,23 @@ export var stack_bytes: [16 * 1024]u8 align(16) linksection(".bss") = undefined;
 const stack_bytes_slice = stack_bytes[0..];
 
 export fn _start() callconv(.Naked) noreturn {
+    // Enable interrupts
+    asm volatile ("sti");
+
+    // Call main function
     @call(.{ .stack = stack_bytes_slice }, main, .{});
-    while (true) {}
+    while (true)
+        asm volatile ("hlt");
 }
 
 pub fn panic(msg: []const u8, _: ?*std.builtin.StackTrace) noreturn {
     @setCold(true);
-    Terminal.write("[kernel panic]: ");
+    Terminal.setColor(.Red, .Black);
+    Terminal.write("\nKERNEL PANIC: ");
     Terminal.write(msg);
-    while (true) {}
+    Terminal.disableCursor();
+    while (true)
+        asm volatile ("hlt");
 }
 
 fn main() void {
