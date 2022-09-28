@@ -28,12 +28,17 @@ export fn _start() callconv(.Naked) noreturn {
 
 pub fn panic(msg: []const u8, _: ?*std.builtin.StackTrace) noreturn {
     @setCold(true);
-    Terminal.write("KERNEL PANIC: ");
+    Terminal.write("[kernel panic]: ");
     Terminal.write(msg);
     while (true) {}
 }
 
 fn main() void {
     Terminal.initialize();
-    Terminal.write("Hello, world!");
+    Terminal.setColor(.Green, .Black);
+    Terminal.write("[oddos]\n\n");
+    Terminal.setColor(.LightBlue, .Black);
+    Terminal.write("> ");
+    Terminal.setColor(.White, .Black);
+    Terminal.moveCursor(2, 2);
 }

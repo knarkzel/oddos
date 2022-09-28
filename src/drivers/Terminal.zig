@@ -3,7 +3,7 @@ const VGA_HEIGHT = 25;
 
 var row: usize = 0;
 var column: usize = 0;
-var color = vga_entry_color(.White, .Black);
+var color = vgaEntryColor(.White, .Black);
 const buffer = @intToPtr([*]volatile u16, 0xB8000);
 
 pub const VgaColor = enum(u8) {
@@ -37,24 +37,48 @@ pub fn initialize() void {
 
 pub fn write(data: []const u8) void {
     for (data) |c|
-        putChar(c);
+        if (c == '\n') {
+            column = 0;
+            row += 1;
+        } else putChar(c);
 }
 
-pub fn vga_entry_color(fg: VgaColor, bg: VgaColor) u8 {
+pub fn vgaEntryColor(fg: VgaColor, bg: VgaColor) u8 {
     return @enumToInt(fg) | (@enumToInt(bg) << 4);
 }
 
-pub fn setColor(new_color: u8) void {
-    color = new_color;
+pub fn setColor(fg: VgaColor, bg: VgaColor) void {
+    color = vgaEntryColor(fg, bg);
 }
 
-fn vga_entry(uc: u8, new_color: u8) u16 {
+pub fn disableCursor() void {
+    outb(0x3D4, 0x0A);
+    outb(0x3D5, 0x20);
+}
+
+pub fn moveCursor(x: u16, y: u16) void {
+    const position = y * VGA_WIDTH + x;
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, @intCast(u8, (position & 0xFF)));
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, @intCast(u8, (position >> 8) & 0xFF));
+}
+
+fn outb(port: u16, value: u8) void {
+    asm volatile ("outb %[value], %[port]"
+        :
+        : [port] "N{dx}" (port),
+          [value] "{al}" (value),
+    );
+}
+
+fn vgaEntry(uc: u8, new_color: u8) u16 {
     return uc | (@as(u16, new_color) << 8);
 }
 
 fn putCharAt(c: u8, new_color: u8, x: usize, y: usize) void {
     const index = y * VGA_WIDTH + x;
-    buffer[index] = vga_entry(c, new_color);
+    buffer[index] = vgaEntry(c, new_color);
 }
 
 fn putChar(c: u8) void {
