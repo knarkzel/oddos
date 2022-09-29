@@ -1,5 +1,8 @@
 const Port = @import("../utils/Port.zig").Port;
 
+// https://wiki.osdev.org/VGA_Hardware
+// https://wiki.osdev.org/VGA_Resources
+// https://wiki.osdev.org/Drawing_In_a_Linear_Framebuffer
 const VGA_WIDTH = 80;
 const VGA_HEIGHT = 25;
 

@@ -1,5 +1,6 @@
 const Port = @import("../utils/Port.zig").Port;
 
+// https://wiki.osdev.org/Serial_Ports
 const base = 0x3F8;
 const data = Port(u8).init(base);
 const int_en = Port(u8).init(base + 1);
