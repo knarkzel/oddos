@@ -1,4 +1,4 @@
-const Port = @import("../utils/Port.zig").Port;
+const Port = @import("../utils.zig").Port;
 
 // https://wiki.osdev.org/Serial_Ports
 const base = 0x3F8;
@@ -49,8 +49,7 @@ pub fn send(byte: u8) void {
 
 /// Sends bytes to the serial port
 pub fn write(bytes: []const u8) void {
-    for (bytes) |byte|
-        send(byte);
+    for (bytes) |byte| send(byte);
 }
 
 /// Receives a byte on the serial port

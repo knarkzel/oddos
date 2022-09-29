@@ -1,4 +1,4 @@
-const Port = @import("../utils/Port.zig").Port;
+const Port = @import("../utils.zig").Port;
 
 // https://wiki.osdev.org/VGA_Hardware
 // https://wiki.osdev.org/VGA_Resources
@@ -10,7 +10,7 @@ var row: usize = 0;
 var column: usize = 0;
 var color = vgaEntryColor(.White, .Black);
 const buffer = @intToPtr([*]volatile u16, 0xB8000);
-const vga_board = Port(u8).init(0x3D4);
+const vga_index = Port(u8).init(0x3D4);
 const vga_data = Port(u8).init(0x3D5);
 
 pub const VgaColor = enum(u8) {
@@ -36,15 +36,17 @@ pub fn init() void {
     var y: usize = 0;
     while (y < VGA_HEIGHT) : (y += 1) {
         var x: usize = 0;
-        while (x < VGA_WIDTH) : (x += 1) {
+        while (x < VGA_WIDTH) : (x += 1)
             putCharAt(' ', color, x, y);
-        }
     }
 }
 
 pub fn write(data: []const u8) void {
     for (data) |c|
-        if (c == '\n') newLine() else putChar(c);
+        if (c == '\n')
+            newLine()
+        else
+            putChar(c);
     moveCursor(@intCast(u16, column), @intCast(u16, row));
 }
 
@@ -57,24 +59,24 @@ pub fn setColor(fg: VgaColor, bg: VgaColor) void {
 }
 
 pub fn disableCursor() void {
-    vga_board.write(0x0A);
+    vga_index.write(0x0A);
     vga_data.write(0x20);
 }
 
 /// start is row where cursor starts, end is row where cursor ends
 pub fn enableCursor(start: u8, end: u8) void {
-    vga_board.write(0x0A);
+    vga_index.write(0x0A);
     vga_data.write(vga_data.read() & 0xC0 | start);
-    vga_board.write(0x0B);
+    vga_index.write(0x0B);
     vga_data.write(vga_data.read() & 0xE0 | end);
 }
 
 /// x is column, y is row
 pub fn moveCursor(x: u16, y: u16) void {
     const position = y * VGA_WIDTH + x;
-    vga_board.write(0x0F);
+    vga_index.write(0x0F);
     vga_data.write(@intCast(u8, (position & 0xFF)));
-    vga_board.write(0x0E);
+    vga_index.write(0x0E);
     vga_data.write(@intCast(u8, (position >> 8) & 0xFF));
 }
 
@@ -85,9 +87,9 @@ const Position = struct {
 
 pub fn getCursor() Position {
     var position: u16 = 0;
-    vga_board.write(0x0F);
+    vga_index.write(0x0F);
     position |= vga_data.read();
-    vga_board.write(0x0E);
+    vga_index.write(0x0E);
     position |= @as(u16, vga_data.read()) << 8;
     return .{
         .x = position % VGA_WIDTH,
