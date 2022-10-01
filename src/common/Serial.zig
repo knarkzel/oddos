@@ -1,4 +1,4 @@
-const Port = @import("../utils.zig").Port;
+const Port = @import("utils.zig").Port;
 
 // https://wiki.osdev.org/Serial_Ports
 const base = 0x3F8;

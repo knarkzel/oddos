@@ -1,7 +1,7 @@
 const std = @import("std");
-const x86 = @import("x86.zig");
+const hlt = @import("arch/x86/asm.zig").hlt;
 const main = @import("main.zig");
-const Terminal = @import("drivers/Terminal.zig");
+const Terminal = @import("common/Terminal.zig");
 
 const MultiBoot = packed struct {
     magic: i32,
@@ -26,7 +26,7 @@ const stack_bytes_slice = stack_bytes[0..];
 export fn _start() callconv(.Naked) noreturn {
     main.init();
     @call(.{ .stack = stack_bytes_slice }, main.main, .{});
-    while (true) x86.hlt();
+    while (true) hlt();
 }
 
 pub fn panic(msg: []const u8, _: ?*std.builtin.StackTrace) noreturn {
@@ -35,5 +35,5 @@ pub fn panic(msg: []const u8, _: ?*std.builtin.StackTrace) noreturn {
     Terminal.write("\nKERNEL PANIC: ");
     Terminal.write(msg);
     Terminal.disableCursor();
-    while (true) x86.hlt();
+    while (true) hlt();
 }

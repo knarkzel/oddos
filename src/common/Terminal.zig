@@ -1,4 +1,4 @@
-const Port = @import("../utils.zig").Port;
+const Port = @import("utils.zig").Port;
 
 // https://wiki.osdev.org/VGA_Hardware
 // https://wiki.osdev.org/VGA_Resources

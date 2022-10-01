@@ -1,3 +1,7 @@
+const x86 = @import("../arch/x86/asm.zig");
+const inb = x86.inb;
+const outb = x86.outb;
+
 // Ports mainly for IO
 pub fn Port(comptime T: type) type {
     return struct {
@@ -23,19 +27,4 @@ pub fn Port(comptime T: type) type {
             };
         }
     };
-}
-
-fn inb(port: u16) u8 {
-    return asm volatile ("inb %[port], %[result]"
-        : [result] "={al}" (-> u8),
-        : [port] "N{dx}" (port),
-    );
-}
-
-fn outb(port: u16, value: u8) void {
-    asm volatile ("outb %[value], %[port]"
-        :
-        : [port] "N{dx}" (port),
-          [value] "{al}" (value),
-    );
 }

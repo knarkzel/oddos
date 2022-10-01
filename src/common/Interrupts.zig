@@ -1,5 +1,5 @@
-const x86 = @import("../x86.zig");
 const Terminal = @import("Terminal.zig");
+const lidt = @import("../arch/x86/asm.zig").lidt;
 
 // https://wiki.osdev.org/Interrupt_Descriptor_Table#Structure_on_IA-32
 // https://wiki.osdev.org/Segment_Selector
@@ -48,7 +48,7 @@ var idt_register = IdtRegister.init(&idt_table);
 
 pub fn init() void {
     idt_table[0] = IdtEntry.withHandler(divide_by_zero);
-    x86.lidt(@ptrToInt(&idt_register));
+    lidt(@ptrToInt(&idt_register));
 }
 
 // Exceptions

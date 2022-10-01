@@ -12,7 +12,7 @@ pub fn build(b: *std.build.Builder) !void {
     const kernel = b.addExecutable("oddos.elf", "src/init.zig");
     kernel.setTarget(target);
     kernel.setBuildMode(mode);
-    kernel.setLinkerScriptPath(.{ .path = "linker.ld" });
+    kernel.setLinkerScriptPath(.{ .path = "src/arch/x86/linker.ld" });
     kernel.code_model = .kernel;
     kernel.install();
 
@@ -39,7 +39,7 @@ pub fn build(b: *std.build.Builder) !void {
     // Iso step
     const dir_cmd = b.addSystemCommand(&.{ "mkdir", "-p", "zig-out/iso/boot/grub" });
     const elf_cmd = b.addSystemCommand(&.{ "cp", "zig-out/bin/oddos.elf", "zig-out/iso/boot" });
-    const cfg_cmd = b.addSystemCommand(&.{ "cp", "grub.cfg", "zig-out/iso/boot/grub" });
+    const cfg_cmd = b.addSystemCommand(&.{ "cp", "src/arch/x86/grub.cfg", "zig-out/iso/boot/grub" });
     const grub_cmd = b.addSystemCommand(&.{ "grub-mkrescue", "-o", "zig-out/bin/oddos.iso", "zig-out/iso" });
 
     const iso_step = b.step("iso", "Build the iso");
