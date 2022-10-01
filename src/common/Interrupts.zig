@@ -1,6 +1,7 @@
 const Terminal = @import("Terminal.zig");
 const lidt = @import("../arch/x86/asm.zig").lidt;
 
+// https://wiki.osdev.org/Security#Rings
 const Ring = enum(u2) {
     zero,
     one,
@@ -8,18 +9,18 @@ const Ring = enum(u2) {
     three,
 };
 
-const Table = enum(u1) {
-    gdt,
-    ldt,
+// https://wiki.osdev.org/Segment_Selector
+const SegmentSelector = packed struct {
+    ring: Ring,
+    table: enum(u1) {
+        gdt,
+        ldt,
+    },
+    index: u13,
 };
 
-// https://wiki.osdev.org/Segment_Selector
-fn selector(index: u16, table: Table, ring: Ring) u16 {
-    return (index << 3 | @enumToInt(table) << 2 | @enumToInt(ring));
-}
-
 // https://wiki.osdev.org/Interrupt_Descriptor_Table#Structure_on_IA-32
-const IdtOptions = packed struct {
+const Options = packed struct {
     gate_type: enum(u4) {
         task_gate = 0x5,
         interrupt_gate_16 = 0x6,
@@ -30,35 +31,35 @@ const IdtOptions = packed struct {
     zero: u1,
     dpl: Ring,
     present: bool,
-
-    fn init() IdtOptions {
-        return .{
-            .gate_type = .interrupt_gate_32,
-            .zero = 0,
-            .dpl = .zero,
-            .present = false,
-        };
-    }
 };
 
-const IdtEntry = packed struct {
+const Entry = packed struct {
     pointer_low: u16,
-    selector: u16,
+    selector: SegmentSelector,
     zero: u8,
-    options: IdtOptions,
+    options: Options,
     pointer_high: u16,
 
-    fn init() IdtEntry {
+    fn init() Entry {
         return .{
             .pointer_low = 0,
-            .selector = selector(0, .zero),
+            .selector = SegmentSelector{
+                .ring = .zero,
+                .table = .gdt,
+                .index = 0,
+            },
             .zero = 0,
-            .options = IdtOptions.init(),
+            .options = Options{
+                .gate_type = .interrupt_gate_32,
+                .zero = 0,
+                .dpl = .zero,
+                .present = false,
+            },
             .pointer_high = 0,
         };
     }
 
-    pub fn setHandler(self: *IdtEntry, pointer: fn () void) void {
+    pub fn setHandler(self: *Entry, pointer: fn () void) void {
         // TODO: set selector to segmentation::cs()
         const addr = @ptrToInt(pointer);
         self.*.options.present = true;
@@ -67,12 +68,11 @@ const IdtEntry = packed struct {
     }
 };
 
-// IDT descriptor register pointing at the IDT.
-const IdtRegister = packed struct {
+const Register = packed struct {
     limit: u16,
-    base: *[256]IdtEntry,
+    base: *[256]Entry,
 
-    fn init(table: *[256]IdtEntry) IdtRegister {
+    fn init(table: *[256]Entry) Register {
         return .{
             .limit = @as(u16, @sizeOf(@TypeOf(table.*))),
             .base = table,
@@ -80,12 +80,11 @@ const IdtRegister = packed struct {
     }
 };
 
-// Interrupt Descriptor Table and Register
-var idt_table: [256]IdtEntry = undefined;
-var idt_register = IdtRegister.init(&idt_table);
+var idt_table: [256]Entry = undefined;
+var idt_register = Register.init(&idt_table);
 
 pub fn init() void {
-    idt_table[0] = IdtEntry.init();
+    idt_table[0] = Entry.init();
     idt_table[0].setHandler(divide_by_zero);
     lidt(@ptrToInt(&idt_register));
 }
