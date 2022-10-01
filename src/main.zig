@@ -5,6 +5,7 @@ const Interrupts = @import("common/Interrupts.zig");
 pub fn init() void {
     Serial.init();
     Terminal.init();
+    Interrupts.init();
 }
 
 pub fn main() void {
