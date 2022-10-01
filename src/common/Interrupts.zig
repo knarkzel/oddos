@@ -2,13 +2,26 @@ const Terminal = @import("Terminal.zig");
 const lidt = @import("../arch/x86/asm.zig").lidt;
 
 // https://wiki.osdev.org/Interrupt_Descriptor_Table#Structure_on_IA-32
+const IdtOptions = packed struct {
+    gate_type: enum(u4) {
+        task_gate = 0x5,
+        interrupt_gate_16 = 0x6,
+        trap_gate_16 = 0x7,
+        interrupt_gate_32 = 0xE,
+        trap_gate_32 = 0xE,
+    },
+    zero: u1 = 0,
+    dpl: u2,
+    present: u1,
+};
+
 // https://wiki.osdev.org/Segment_Selector
 const IdtEntry = packed struct {
     pointer_low: u16,
     selector: u16,
     zero: u8,
     options: u8,
-    pointer_high: u32,
+    pointer_high: u16,
 
     fn init() IdtEntry {
         return .{
@@ -20,7 +33,7 @@ const IdtEntry = packed struct {
         };
     }
 
-    pub fn withHandler(pointer: fn () void) IdtEntry {
+    pub fn withHandler(pointer: fn () noreturn) IdtEntry {
         var entry = IdtEntry.init();
         const addr = @ptrToInt(pointer);
         entry.pointer_low = @truncate(u16, addr);
@@ -52,6 +65,7 @@ pub fn init() void {
 }
 
 // Exceptions
-fn divide_by_zero() void {
+fn divide_by_zero() noreturn {
     Terminal.write("DIVIDE BY ZERO OCCURED");
+    while (true) {}
 }
