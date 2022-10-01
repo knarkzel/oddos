@@ -14,4 +14,8 @@ pub fn main() void {
     Terminal.setColor(.LightBlue, .Black);
     Terminal.write("> ");
     Terminal.setColor(.White, .Black);
+
+    var i: u8 = 1;
+    i -= 1;
+    Terminal.write(&.{10 / i});
 }

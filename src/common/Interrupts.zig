@@ -1,16 +1,21 @@
 const Terminal = @import("Terminal.zig");
 const lidt = @import("../arch/x86/asm.zig").lidt;
 
-const Ring = enum(u4) {
+const Ring = enum(u2) {
     zero,
     one,
     two,
     three,
 };
 
-// Create a new SegmentSelector where index is index in GDT or LDT array
-fn selector(index: u16, ring: Ring) u16 {
-    return (index << 3 | @enumToInt(ring));
+const Table = enum(u1) {
+    gdt,
+    ldt,
+};
+
+// https://wiki.osdev.org/Segment_Selector
+fn selector(index: u16, table: Table, ring: Ring) u16 {
+    return (index << 3 | @enumToInt(table) << 2 | @enumToInt(ring));
 }
 
 // https://wiki.osdev.org/Interrupt_Descriptor_Table#Structure_on_IA-32
@@ -23,20 +28,19 @@ const IdtOptions = packed struct {
         trap_gate_32 = 0xF,
     },
     zero: u1,
-    dpl: u2,
-    present: u1,
+    dpl: Ring,
+    present: bool,
 
     fn init() IdtOptions {
         return .{
             .gate_type = .interrupt_gate_32,
             .zero = 0,
-            .dpl = 0,
-            .present = 1,
+            .dpl = .zero,
+            .present = false,
         };
     }
 };
 
-// https://wiki.osdev.org/Segment_Selector
 const IdtEntry = packed struct {
     pointer_low: u16,
     selector: u16,
@@ -54,9 +58,10 @@ const IdtEntry = packed struct {
         };
     }
 
-    pub fn setHandler(self: *IdtEntry, pointer: fn () noreturn) void {
+    pub fn setHandler(self: *IdtEntry, pointer: fn () void) void {
         // TODO: set selector to segmentation::cs()
         const addr = @ptrToInt(pointer);
+        self.*.options.present = true;
         self.*.pointer_low = @truncate(u16, addr);
         self.*.pointer_high = @truncate(u16, addr >> 16);
     }
@@ -69,7 +74,7 @@ const IdtRegister = packed struct {
 
     fn init(table: *[256]IdtEntry) IdtRegister {
         return .{
-            .limit = @as(u16, @sizeOf(@TypeOf(table.*))) - 1,
+            .limit = @as(u16, @sizeOf(@TypeOf(table.*))),
             .base = table,
         };
     }
@@ -80,16 +85,13 @@ var idt_table: [256]IdtEntry = undefined;
 var idt_register = IdtRegister.init(&idt_table);
 
 pub fn init() void {
-    idt_table[0] = blk: {
-        var entry = IdtEntry.init();
-        entry.setHandler(divide_by_zero);
-        break :blk entry;
-    };
+    idt_table[0] = IdtEntry.init();
+    idt_table[0].setHandler(divide_by_zero);
     lidt(@ptrToInt(&idt_register));
 }
 
 // Exceptions
-fn divide_by_zero() noreturn {
+fn divide_by_zero() void {
     Terminal.write("DIVIDE BY ZERO OCCURED");
     while (true) {}
 }
