@@ -1,95 +1,94 @@
-const Terminal = @import("../common/Terminal.zig");
+const std = @import("std");
+const fieldInfo = std.meta.fieldInfo;
 const lidt = @import("../arch/x86/asm.zig").lidt;
+const Terminal = @import("../driver/Terminal.zig");
 
-// https://wiki.osdev.org/Security#Rings
-const Ring = enum(u2) {
-    zero,
-    one,
-    two,
-    three,
-};
-
-// https://wiki.osdev.org/Segment_Selector
-const SegmentSelector = packed struct {
-    ring: Ring,
-    table: enum(u1) {
-        gdt,
-        ldt,
+// https://wiki.osdev.org/Interrupt_Descriptor_Table#Gate_Descriptor
+const GateDescriptor = packed struct {
+    offset_low: u16,
+    segment_selector: packed struct {
+        privilege: enum(u2) {
+            zero,
+            one,
+            two,
+            three,
+        },
+        table: enum(u1) {
+            gdt,
+            ldt,
+        },
+        index: u13,
     },
-    index: u13,
-};
-
-// https://wiki.osdev.org/Interrupt_Descriptor_Table#Structure_on_IA-32
-const Options = packed struct {
-    gate_type: enum(u4) {
-        task_gate = 0x5,
-        interrupt_gate_16 = 0x6,
-        trap_gate_16 = 0x7,
-        interrupt_gate_32 = 0xE,
-        trap_gate_32 = 0xF,
+    reserved: u8,
+    options: packed struct {
+        gate_type: enum(u4) {
+            task_gate = 0x5,
+            interrupt_gate_16 = 0x6,
+            trap_gate_16 = 0x7,
+            interrupt_gate_32 = 0xE,
+            trap_gate_32 = 0xF,
+        },
+        reserved: u1,
+        privilege: enum(u2) {
+            zero,
+            one,
+            two,
+            three,
+        },
+        present: bool,
     },
-    zero: u1,
-    dpl: Ring,
-    present: bool,
-};
+    offset_high: u16,
 
-const Entry = packed struct {
-    pointer_low: u16,
-    selector: SegmentSelector,
-    zero: u8,
-    options: Options,
-    pointer_high: u16,
-
-    fn init() Entry {
+    fn init() GateDescriptor {
         return .{
-            .pointer_low = 0,
-            .selector = SegmentSelector{
-                .ring = .zero,
+            .offset_low = 0,
+            .segment_selector = .{
+                .privilege = .zero,
                 .table = .gdt,
                 .index = 0,
             },
-            .zero = 0,
-            .options = Options{
-                .gate_type = .interrupt_gate_32,
-                .zero = 0,
-                .dpl = .zero,
+            .reserved = 0,
+            .options = .{
+                .gate_type = .trap_gate_32,
+                .reserved = 0,
+                .privilege = .zero,
                 .present = false,
             },
-            .pointer_high = 0,
+            .offset_high = 0,
         };
     }
 
-    pub fn setHandler(self: *Entry, pointer: fn () void) void {
-        // TODO: set selector to segmentation::cs()
-        const addr = @ptrToInt(pointer);
+    pub fn setException(self: *GateDescriptor, handler: fn () callconv(.Interrupt) void) void {
+        const offset = @ptrToInt(handler);
         self.*.options.present = true;
-        self.*.pointer_low = @truncate(u16, addr);
-        self.*.pointer_high = @truncate(u16, addr >> 16);
+        self.*.offset_low = @truncate(u16, offset);
+        self.*.offset_high = @truncate(u16, offset >> 16);
     }
 };
 
-const Register = packed struct {
+const InterruptDescriptorRegister = packed struct {
     limit: u16,
-    base: *[256]Entry,
+    base: *[256]GateDescriptor,
 
-    fn init(table: *[256]Entry) Register {
+    fn init(table: *[256]GateDescriptor) InterruptDescriptorRegister {
         return .{
-            .limit = @as(u16, @sizeOf(@TypeOf(table.*))),
+            .limit = @as(u16, @sizeOf(@TypeOf(table.*))) - 1,
             .base = table,
         };
     }
 };
 
-var idt_table: [256]Entry = undefined;
-const idt_register = Register.init(&idt_table);
+var idt_table: [256]GateDescriptor = undefined;
+var idt_register: InterruptDescriptorRegister = undefined;
 
 pub fn init() void {
-    idt_table[0] = Entry.init();
-    idt_table[0].setHandler(divide_by_zero);
+    idt_table[0] = GateDescriptor.init();
+    idt_table[0].setException(divide_by_zero);
+    idt_register = InterruptDescriptorRegister.init(&idt_table);
     lidt(@ptrToInt(&idt_register));
 }
 
 // Exceptions
-fn divide_by_zero() void {
+fn divide_by_zero() callconv(.Interrupt) void {
     Terminal.write("DIVIDE BY ZERO OCCURED");
 }

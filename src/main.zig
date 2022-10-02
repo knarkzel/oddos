@@ -1,6 +1,6 @@
+const gdt = @import("system/gdt.zig");
 const Serial = @import("driver/Serial.zig");
 const Terminal = @import("driver/Terminal.zig");
-const gdt = @import("system/gdt.zig");
 
 pub fn init() void {
     gdt.init();
