@@ -1,18 +1,18 @@
 const std = @import("std");
-const hlt = @import("arch/x86/asm.zig").hlt;
 const main = @import("main.zig");
-const Terminal = @import("common/Terminal.zig");
+const hlt = @import("arch/x86/asm.zig").hlt;
+const Terminal = @import("driver/Terminal.zig");
+
+const ALIGN = 1 << 0;
+const MEMINFO = 1 << 1;
+const MAGIC = 0x1BADB002;
+const FLAGS = ALIGN | MEMINFO;
 
 const MultiBoot = packed struct {
     magic: i32,
     flags: i32,
     checksum: i32,
 };
-
-const ALIGN = 1 << 0;
-const MEMINFO = 1 << 1;
-const MAGIC = 0x1BADB002;
-const FLAGS = ALIGN | MEMINFO;
 
 export var multiboot align(4) linksection(".multiboot") = MultiBoot{
     .magic = MAGIC,
@@ -21,11 +21,10 @@ export var multiboot align(4) linksection(".multiboot") = MultiBoot{
 };
 
 export var stack_bytes: [16 * 1024]u8 align(16) linksection(".bss") = undefined;
-const stack_bytes_slice = stack_bytes[0..];
 
 export fn _start() callconv(.Naked) noreturn {
     main.init();
-    @call(.{ .stack = stack_bytes_slice }, main.main, .{});
+    @call(.{ .stack = &stack_bytes }, main.main, .{});
     while (true) hlt();
 }
 

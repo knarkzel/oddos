@@ -1,11 +1,11 @@
-const Serial = @import("common/Serial.zig");
-const Terminal = @import("common/Terminal.zig");
-const Interrupts = @import("common/Interrupts.zig");
+const Serial = @import("driver/Serial.zig");
+const Terminal = @import("driver/Terminal.zig");
+const gdt = @import("system/gdt.zig");
 
 pub fn init() void {
+    gdt.init();
     Serial.init();
     Terminal.init();
-    Interrupts.init();
 }
 
 pub fn main() void {
@@ -14,8 +14,4 @@ pub fn main() void {
     Terminal.setColor(.LightBlue, .Black);
     Terminal.write("> ");
     Terminal.setColor(.White, .Black);
-
-    var i: u8 = 1;
-    i -= 1;
-    Terminal.write(&.{10 / i});
 }

@@ -1,4 +1,4 @@
-const Terminal = @import("Terminal.zig");
+const Terminal = @import("../common/Terminal.zig");
 const lidt = @import("../arch/x86/asm.zig").lidt;
 
 // https://wiki.osdev.org/Security#Rings
@@ -81,7 +81,7 @@ const Register = packed struct {
 };
 
 var idt_table: [256]Entry = undefined;
-var idt_register = Register.init(&idt_table);
+const idt_register = Register.init(&idt_table);
 
 pub fn init() void {
     idt_table[0] = Entry.init();
@@ -92,5 +92,4 @@ pub fn init() void {
 // Exceptions
 fn divide_by_zero() void {
     Terminal.write("DIVIDE BY ZERO OCCURED");
-    while (true) {}
 }

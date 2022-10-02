@@ -1,4 +1,4 @@
-const x86 = @import("../arch/x86/asm.zig");
+const x86 = @import("arch/x86/asm.zig");
 const inb = x86.inb;
 const outb = x86.outb;
 
