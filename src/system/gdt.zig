@@ -74,31 +74,6 @@ const SegmentDescriptor = packed struct {
     }
 };
 
-const SystemSegmentDescriptor = packed struct {
-    @"type": enum(u4) {
-        tss_available_16 = 0x1,
-        ldt = 0x2,
-        tss_busy_16 = 0x3,
-        tss_available_32 = 0x9,
-        tss_busy_32 = 0xB,
-    },
-    descriptor: enum(u1) {
-        system_segment,
-        code_or_data,
-    },
-    privilege: enum(u2) {
-        zero,
-        one,
-        two,
-        three,
-    },
-    present: bool,
-
-    fn init(access_byte: u8) SystemSegmentDescriptor {
-        return @bitCast(SystemSegmentDescriptor, access_byte);
-    }
-};
-
 const GlobalDescriptorRegister = packed struct {
     limit: u16,
     base: *[5]SegmentDescriptor,
