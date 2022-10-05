@@ -16,10 +16,3 @@ pub inline fn outb(port: u16, value: u8) void {
           [value] "{al}" (value),
     );
 }
-
-pub inline fn lidt(idt_table: usize) void {
-    asm volatile ("lidt (%[idt_table])"
-        :
-        : [idt_table] "r" (idt_table),
-    );
-}

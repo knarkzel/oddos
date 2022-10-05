@@ -20,6 +20,6 @@ const Registers = struct {
 };
 
 pub fn isr_handler(registers: Registers) void {
-    Terminal.write("H");
+    Terminal.write("\nINTERRUPT: ");
     Terminal.write(&.{@truncate(u8, registers.number) + '0'});
 }

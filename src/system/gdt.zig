@@ -10,7 +10,7 @@ const SegmentDescriptor = packed struct {
 
     fn init(base: u32, limit: u32, access: u8, granularity: u8) SegmentDescriptor {
         return .{
-            .base_low = @truncate(u16, base),
+            .base_low = @truncate(u16, base & 0xFFFF),
             .base_middle = @truncate(u8, (base >> 16) & 0xFF),
             .base_high = @truncate(u8, (base >> 24) & 0xFF),
             .limit_low = @truncate(u16, limit & 0xFFFF),

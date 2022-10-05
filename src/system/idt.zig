@@ -1,5 +1,4 @@
 const std = @import("std");
-const lidt = @import("../arch/x86/asm.zig").lidt;
 
 // These extern directives lets us access the address of our ASM ISR handlers
 extern fn isr0() void;
@@ -104,6 +103,8 @@ pub fn init() void {
     idt_table[29] = GateDescriptor.init(@ptrToInt(isr29), 0x08, 0x8E);
     idt_table[30] = GateDescriptor.init(@ptrToInt(isr30), 0x08, 0x8E);
     idt_table[31] = GateDescriptor.init(@ptrToInt(isr31), 0x08, 0x8E);
+
+    // Load idt
     idt_register = InterruptDescriptorRegister.init(&idt_table);
-    lidt(@ptrToInt(&idt_register));
+    load_idt(&idt_register);
 }

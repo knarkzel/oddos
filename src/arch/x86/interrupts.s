@@ -1,27 +1,25 @@
 .macro isr_generate n
-    .align 4
     .type isr\n, @function
     .global isr\n
 
     isr\n:
-        cli 
-        // Push a dummy error code for interrupts that don't have one
+        // Push a dummy error code for interrupts that don't have one.
         .if (\n != 8 && !(\n >= 10 && \n <= 14) && \n != 17)
             push $0
         .endif
-        push $\n
-        jmp isr_common_stub
+        push $\n       // Push the interrupt number.
+        jmp isr_common  // Jump to the common handler.
 .endmacro
-
-.extern isr_handler
     
-isr_common_stub:
+.extern isr_handler
+
+isr_common:
     pusha            // Pushes edi, esi, ebp, esp, ebx, edx, ecx, eax
 
     mov %ds, %ax     // Lower 16-bits of eax = ds
     push %eax        // Save the data segment descriptor
 
-    mov 0x10, %ax    // Load the kernel data segment descriptor
+    mov $0x10, %ax   // Load the kernel data segment descriptor
     mov %ax, %ds
     mov %ax, %es
     mov %ax, %fs
@@ -29,11 +27,11 @@ isr_common_stub:
 
     call isr_handler
 
-    pop %eax
+    pop %eax         // Reload the original data segment descriptor
     mov %ax, %ds
     mov %ax, %es
     mov %ax, %fs
-    mov %gs, %ax
+    mov %ax, %gs
 
     popa             // Pops edi, esi, ebp, esp, ebx, edx, ecx, eax
     add 0x8, %esp    // Cleans up the pushed error code and pushed ISR number
