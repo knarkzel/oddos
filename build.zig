@@ -10,6 +10,7 @@ pub fn build(b: *std.build.Builder) !void {
     const mode = b.standardReleaseOptions();
 
     const kernel = b.addExecutable("oddos.elf", "src/init.zig");
+    kernel.want_lto = false;
     kernel.addAssemblyFile("src/arch/x86/gdt.s");
     kernel.addAssemblyFile("src/arch/x86/interrupts.s");
     kernel.setTarget(target);
