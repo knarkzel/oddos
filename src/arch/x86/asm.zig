@@ -23,10 +23,3 @@ pub inline fn lidt(idt_table: usize) void {
         : [idt_table] "r" (idt_table),
     );
 }
-
-pub inline fn lgdt(gdt_table: usize) void {
-    asm volatile ("lgdt (%[gdt_table])"
-        :
-        : [gdt_table] "r" (gdt_table),
-    );
-}
