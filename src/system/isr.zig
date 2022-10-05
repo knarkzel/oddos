@@ -1,0 +1,18 @@
+pub const Registers = extern struct {
+    ds: usize,
+    edi: usize,
+    esi: usize,
+    ebp: usize,
+    esp: usize,
+    ebx: usize,
+    edx: usize,
+    ecx: usize,
+    eax: usize,
+    number: usize,
+    error_code: usize,
+    eip: usize,
+    cs: usize,
+    eflags: usize,
+    useresp: usize,
+    ss: usize,
+};

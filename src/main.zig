@@ -1,29 +1,14 @@
 const gdt = @import("system/gdt.zig");
 const idt = @import("system/idt.zig");
+const isr = @import("system/isr.zig");
 const Serial = @import("driver/Serial.zig");
 const Terminal = @import("driver/Terminal.zig");
 
-const Registers = struct {
-    ds: u32,
-    edi: u32,
-    esi: u32,
-    ebp: u32,
-    esp: u32,
-    ebx: u32,
-    edx: u32,
-    ecx: u32,
-    eax: u32,
-    number: u32,
-    error_code: u32,
-    eip: u32,
-    cs: u32,
-    eflags: u32,
-    useresp: u32,
-    ss: u32,
-};
-
-export fn isr_handler() void {
-    Terminal.write("\nINTERRUPT OCCURRED");
+export fn isr_handler(registers: isr.Registers) void {
+    Terminal.setColor(.Red, .Black);
+    Terminal.write("\nINTERRUPT OCCURRED: ");
+    Terminal.write_dec(registers.number);
+    Terminal.disableCursor();
 }
 
 pub fn init() void {

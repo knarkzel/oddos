@@ -50,6 +50,10 @@ pub fn write(data: []const u8) void {
     moveCursor(@intCast(u16, column), @intCast(u16, row));
 }
 
+pub fn write_dec(number: usize) void {
+    write(&.{@intCast(u8, number) + '0'});
+}
+
 pub fn vgaEntryColor(fg: VgaColor, bg: VgaColor) u8 {
     return @enumToInt(fg) | (@enumToInt(bg) << 4);
 }
