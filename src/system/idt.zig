@@ -1,6 +1,9 @@
 const std = @import("std");
+const isr = @import("isr.zig");
+const Port = @import("../utils.zig").Port;
+const Terminal = @import("../driver/Terminal.zig");
 
-// These extern directives lets us access the address of our ASM ISR handlers
+// Extern directives ASM ISR handlers
 extern fn isr0() void;
 extern fn isr1() void;
 extern fn isr2() void;
@@ -33,6 +36,24 @@ extern fn isr28() void;
 extern fn isr29() void;
 extern fn isr30() void;
 extern fn isr31() void;
+
+// Extern directives for ASM ISR handlers
+extern fn irq0() void;
+extern fn irq1() void;
+extern fn irq2() void;
+extern fn irq3() void;
+extern fn irq4() void;
+extern fn irq5() void;
+extern fn irq6() void;
+extern fn irq7() void;
+extern fn irq8() void;
+extern fn irq9() void;
+extern fn irq10() void;
+extern fn irq11() void;
+extern fn irq12() void;
+extern fn irq13() void;
+extern fn irq14() void;
+extern fn irq15() void;
 
 // https://wiki.osdev.org/Interrupt_Descriptor_Table#Gate_Descriptor
 const GateDescriptor = packed struct {
@@ -71,6 +92,19 @@ var idt_table: [256]GateDescriptor = undefined;
 var idt_register: InterruptDescriptorRegister = undefined;
 
 pub fn init() void {
+    // Remap the irq table
+    Port(u8).init(0x20).write(0x11);
+    Port(u8).init(0xA0).write(0x11);
+    Port(u8).init(0x21).write(0x20);
+    Port(u8).init(0xA1).write(0x28);
+    Port(u8).init(0x21).write(0x04);
+    Port(u8).init(0xA1).write(0x02);
+    Port(u8).init(0x21).write(0x01);
+    Port(u8).init(0xA1).write(0x01);
+    Port(u8).init(0x21).write(0x00);
+    Port(u8).init(0xA1).write(0x00);
+
+    // Load default exceptions into idt
     idt_table[0] = GateDescriptor.init(@ptrToInt(isr0), 0x08, 0x8E);
     idt_table[1] = GateDescriptor.init(@ptrToInt(isr1), 0x08, 0x8E);
     idt_table[2] = GateDescriptor.init(@ptrToInt(isr2), 0x08, 0x8E);
@@ -103,6 +137,24 @@ pub fn init() void {
     idt_table[29] = GateDescriptor.init(@ptrToInt(isr29), 0x08, 0x8E);
     idt_table[30] = GateDescriptor.init(@ptrToInt(isr30), 0x08, 0x8E);
     idt_table[31] = GateDescriptor.init(@ptrToInt(isr31), 0x08, 0x8E);
+
+    // Load default interrupt requests into idt
+    idt_table[32] = GateDescriptor.init(@ptrToInt(irq0), 0x08, 0x8E);
+    idt_table[33] = GateDescriptor.init(@ptrToInt(irq1), 0x08, 0x8E);
+    idt_table[34] = GateDescriptor.init(@ptrToInt(irq2), 0x08, 0x8E);
+    idt_table[35] = GateDescriptor.init(@ptrToInt(irq3), 0x08, 0x8E);
+    idt_table[36] = GateDescriptor.init(@ptrToInt(irq4), 0x08, 0x8E);
+    idt_table[37] = GateDescriptor.init(@ptrToInt(irq5), 0x08, 0x8E);
+    idt_table[38] = GateDescriptor.init(@ptrToInt(irq6), 0x08, 0x8E);
+    idt_table[39] = GateDescriptor.init(@ptrToInt(irq7), 0x08, 0x8E);
+    idt_table[40] = GateDescriptor.init(@ptrToInt(irq8), 0x08, 0x8E);
+    idt_table[41] = GateDescriptor.init(@ptrToInt(irq9), 0x08, 0x8E);
+    idt_table[42] = GateDescriptor.init(@ptrToInt(irq10), 0x08, 0x8E);
+    idt_table[43] = GateDescriptor.init(@ptrToInt(irq11), 0x08, 0x8E);
+    idt_table[44] = GateDescriptor.init(@ptrToInt(irq12), 0x08, 0x8E);
+    idt_table[45] = GateDescriptor.init(@ptrToInt(irq13), 0x08, 0x8E);
+    idt_table[46] = GateDescriptor.init(@ptrToInt(irq14), 0x08, 0x8E);
+    idt_table[47] = GateDescriptor.init(@ptrToInt(irq15), 0x08, 0x8E);
 
     // Load idt
     idt_register = InterruptDescriptorRegister.init(&idt_table);
