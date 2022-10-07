@@ -14,13 +14,13 @@ const enable_interrupts = @import("arch/x86/asm.zig").sti;
 
 export fn isr_handler(registers: isr.Registers) void {
     Terminal.setColor(.Red, .Black);
-    Terminal.write("\nINTERRUPT OCCURRED: ");
+    Terminal.write("INTERRUPT OCCURRED: ");
     Terminal.write_dec(registers.number);
+    Terminal.write("\n");
     Terminal.disableCursor();
 }
 
 export fn irq_handler(registers: isr.Registers) void {
-    Terminal.write_dec(registers.number);
     if (registers.number >= 40)
         Port(u8).init(0xA0).write(0x20); // Send reset signal to slave
     Port(u8).init(0x20).write(0x20); // Send reset signal to master

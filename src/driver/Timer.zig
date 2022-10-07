@@ -6,8 +6,9 @@ var tick: u32 = 0;
 
 fn handler(_: isr.Registers) void {
     tick += 1;
-    Terminal.write("\nTick: ");
+    Terminal.write("Tick: ");
     Terminal.write_dec(tick);
+    Terminal.write("\n");
 }
 
 pub fn init(frequency: u32) void {

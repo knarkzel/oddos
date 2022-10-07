@@ -52,13 +52,13 @@ pub fn write(data: []const u8) void {
     moveCursor(@intCast(u16, column), @intCast(u16, row));
 }
 
-pub fn write_dec(input: usize) void {
+fn write_number(input: usize, radix: usize) void {
     var i: usize = 0;
     var number: usize = input;
     var buf: [10]u8 = undefined;
     while (number > 0) {
-        buf[i] = @intCast(u8, number % 10);
-        number /= 10;
+        buf[i] = @intCast(u8, number % radix);
+        number /= radix;
         i += 1;
     }
     while (i > 0) {
@@ -66,6 +66,20 @@ pub fn write_dec(input: usize) void {
         putChar(buf[i] + '0');
     }
     moveCursor(@intCast(u16, column), @intCast(u16, row));
+}
+
+pub fn write_bin(input: usize) void {
+    write("0b");
+    write_number(input, 2);
+}
+
+pub fn write_dec(input: usize) void {
+    write_number(input, 10);
+}
+
+pub fn write_hex(input: usize) void {
+    write("0x");
+    write_number(input, 16);
 }
 
 pub fn vgaEntryColor(fg: VgaColor, bg: VgaColor) u8 {
