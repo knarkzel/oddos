@@ -53,17 +53,24 @@ pub fn write(data: []const u8) void {
 }
 
 fn write_number(input: usize, radix: usize) void {
-    var i: usize = 0;
-    var number: usize = input;
-    var buf: [10]u8 = undefined;
-    while (number > 0) {
-        buf[i] = @intCast(u8, number % radix);
-        number /= radix;
-        i += 1;
-    }
-    while (i > 0) {
-        i -= 1;
-        putChar(buf[i] + '0');
+    if (input == 0)
+        putChar('0')
+    else {
+        var i: usize = 0;
+        var number: usize = input;
+        var buf: [10]u8 = undefined;
+        while (number > 0) {
+            buf[i] = @intCast(u8, number % radix);
+            number /= radix;
+            i += 1;
+        }
+        while (i > 0) {
+            i -= 1;
+            if (buf[i] > 9)
+                putChar(buf[i] - 10 + 'A')
+            else
+                putChar(buf[i] + '0');
+        }
     }
     moveCursor(@intCast(u16, column), @intCast(u16, row));
 }

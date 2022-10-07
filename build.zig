@@ -55,6 +55,7 @@ pub fn build(b: *std.build.Builder) !void {
     // Gdb step
     const gdb_cmd = b.addSystemCommand(&.{
         "gdb",
+        "-tui",
         "--args",
         "zig-out/bin/oddos.elf",
     });

@@ -4,7 +4,7 @@
 load_gdt:
 	mov +4(%esp), %eax          // Fetch the gdt register
 	lgdt (%eax)                 // Load the new GDT
-    jmp $0x08, $reload_segments // Reload segments
+    ljmp $0x08, $reload_segments // Reload segments
 
 reload_segments:
     mov $0x10, %ax

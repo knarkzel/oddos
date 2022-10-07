@@ -7,17 +7,16 @@ const isr = @import("system/isr.zig");
 const Timer = @import("driver/Timer.zig");
 const Serial = @import("driver/Serial.zig");
 const Terminal = @import("driver/Terminal.zig");
+const Keyboard = @import("driver/Keyboard.zig");
 
 // Utils
 const Port = @import("utils.zig").Port;
+const wait = @import("utils.zig").wait;
 const enable_interrupts = @import("arch/x86/asm.zig").sti;
 
 export fn isr_handler(registers: isr.Registers) void {
-    Terminal.setColor(.Red, .Black);
     Terminal.write("INTERRUPT OCCURRED: ");
-    Terminal.write_dec(registers.number);
-    Terminal.write("\n");
-    Terminal.disableCursor();
+    Terminal.write_hex(registers.number);
 }
 
 export fn irq_handler(registers: isr.Registers) void {
@@ -33,7 +32,7 @@ pub fn init() void {
     idt.init();
     Serial.init();
     Terminal.init();
-    Timer.init(50);
+    Keyboard.init();
     enable_interrupts();
 }
 

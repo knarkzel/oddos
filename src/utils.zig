@@ -28,3 +28,8 @@ pub fn Port(comptime T: type) type {
         }
     };
 }
+
+// Adds delay to IO
+pub fn wait() void {
+    Port(u8).init(0x80).write(0);
+}

@@ -1,7 +1,11 @@
 const std = @import("std");
 const isr = @import("isr.zig");
-const Port = @import("../utils.zig").Port;
+const utils = @import("../utils.zig");
 const Terminal = @import("../driver/Terminal.zig");
+
+// Utils
+const Port = utils.Port;
+const wait = utils.wait;
 
 // Extern directives ASM ISR handlers
 extern fn isr0() void;
@@ -93,16 +97,28 @@ var idt_register: InterruptDescriptorRegister = undefined;
 
 pub fn init() void {
     // Remap the irq table
+    const mask_master = Port(u8).init(0x21).read();
+    const mask_slave = Port(u8).init(0xA1).read();
+
     Port(u8).init(0x20).write(0x11);
+    wait();
     Port(u8).init(0xA0).write(0x11);
+    wait();
     Port(u8).init(0x21).write(0x20);
+    wait();
     Port(u8).init(0xA1).write(0x28);
+    wait();
     Port(u8).init(0x21).write(0x04);
+    wait();
     Port(u8).init(0xA1).write(0x02);
+    wait();
     Port(u8).init(0x21).write(0x01);
+    wait();
     Port(u8).init(0xA1).write(0x01);
-    Port(u8).init(0x21).write(0x00);
-    Port(u8).init(0xA1).write(0x00);
+    wait();
+
+    Port(u8).init(0x21).write(mask_master);
+    Port(u8).init(0xA1).write(mask_slave);
 
     // Load default exceptions into idt
     idt_table[0] = GateDescriptor.init(@ptrToInt(isr0), 0x08, 0x8E);
