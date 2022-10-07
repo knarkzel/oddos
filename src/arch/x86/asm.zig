@@ -16,3 +16,7 @@ pub inline fn outb(port: u16, value: u8) void {
           [value] "{al}" (value),
     );
 }
+
+pub inline fn sti() void {
+    asm volatile ("sti");
+}

@@ -1,10 +1,16 @@
+// System
 const gdt = @import("system/gdt.zig");
 const idt = @import("system/idt.zig");
 const isr = @import("system/isr.zig");
-const Port = @import("utils.zig").Port;
+
+// Drivers
 const Timer = @import("driver/Timer.zig");
 const Serial = @import("driver/Serial.zig");
 const Terminal = @import("driver/Terminal.zig");
+
+// Utils
+const Port = @import("utils.zig").Port;
+const enable_interrupts = @import("arch/x86/asm.zig").sti;
 
 export fn isr_handler(registers: isr.Registers) void {
     Terminal.setColor(.Red, .Black);
@@ -14,6 +20,7 @@ export fn isr_handler(registers: isr.Registers) void {
 }
 
 export fn irq_handler(registers: isr.Registers) void {
+    Terminal.write_dec(registers.number);
     if (registers.number >= 40)
         Port(u8).init(0xA0).write(0x20); // Send reset signal to slave
     Port(u8).init(0x20).write(0x20); // Send reset signal to master
@@ -26,8 +33,8 @@ pub fn init() void {
     idt.init();
     Serial.init();
     Terminal.init();
-    Timer.init(10);
-    asm volatile ("sti");
+    Timer.init(50);
+    enable_interrupts();
 }
 
 pub fn main() void {

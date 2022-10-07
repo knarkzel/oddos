@@ -1,3 +1,5 @@
+const std = @import("std");
+const fmt = std.fmt;
 const Port = @import("../utils.zig").Port;
 
 // https://wiki.osdev.org/VGA_Hardware
@@ -50,8 +52,20 @@ pub fn write(data: []const u8) void {
     moveCursor(@intCast(u16, column), @intCast(u16, row));
 }
 
-pub fn write_dec(number: usize) void {
-    write(&.{@intCast(u8, number) + '0'});
+pub fn write_dec(input: usize) void {
+    var i: usize = 0;
+    var number: usize = input;
+    var buf: [10]u8 = undefined;
+    while (number > 0) {
+        buf[i] = @intCast(u8, number % 10);
+        number /= 10;
+        i += 1;
+    }
+    while (i > 0) {
+        i -= 1;
+        putChar(buf[i] + '0');
+    }
+    moveCursor(@intCast(u16, column), @intCast(u16, row));
 }
 
 pub fn vgaEntryColor(fg: VgaColor, bg: VgaColor) u8 {
