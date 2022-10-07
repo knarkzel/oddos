@@ -14,6 +14,8 @@
     
 .extern isr_handler
 
+.type isr_common, @function
+    
 isr_common:
     pusha            // Pushes edi, esi, ebp, esp, ebx, edx, ecx, eax
 
@@ -86,6 +88,8 @@ isr_generate 31
 
 .extern irq_handler
 
+.type irq_common, @function
+    
 irq_common:
     pusha            // Pushes edi, esi, ebp, esp, ebx, edx, ecx, eax
 
@@ -107,23 +111,23 @@ irq_common:
     mov %bx, %gs
 
     popa             // Pops edi, esi, ebp, esp, ebx, edx, ecx, eax
-    add 0x8, %esp    // Cleans up the pushed error code and pushed ISR number
+    add $8, %esp     // Cleans up the pushed error code and pushed ISR number
     sti
     iret             // Pops cs, eip, eflags, ss, and esp
     
-irq_generate 0, 32
-irq_generate 1, 33
-irq_generate 2, 34
-irq_generate 3, 35
-irq_generate 4, 36
-irq_generate 5, 37
-irq_generate 6, 38
-irq_generate 7, 39
-irq_generate 8, 40
-irq_generate 9, 41
-irq_generate 10, 42
-irq_generate 11, 43
-irq_generate 12, 44
-irq_generate 13, 45
-irq_generate 14, 46
-irq_generate 15, 47
+irq_generate 0 32
+irq_generate 1 33
+irq_generate 2 34
+irq_generate 3 35
+irq_generate 4 36
+irq_generate 5 37
+irq_generate 6 38
+irq_generate 7 39
+irq_generate 8 40
+irq_generate 9 41
+irq_generate 10 42
+irq_generate 11 43
+irq_generate 12 44
+irq_generate 13 45
+irq_generate 14 46
+irq_generate 15 47

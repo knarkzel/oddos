@@ -32,7 +32,7 @@ pub fn init() void {
     idt.init();
     Serial.init();
     Terminal.init();
-    Keyboard.init();
+    Timer.init(50);
     enable_interrupts();
 }
 

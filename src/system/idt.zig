@@ -97,28 +97,16 @@ var idt_register: InterruptDescriptorRegister = undefined;
 
 pub fn init() void {
     // Remap the irq table
-    const mask_master = Port(u8).init(0x21).read();
-    const mask_slave = Port(u8).init(0xA1).read();
-
     Port(u8).init(0x20).write(0x11);
-    wait();
     Port(u8).init(0xA0).write(0x11);
-    wait();
     Port(u8).init(0x21).write(0x20);
-    wait();
     Port(u8).init(0xA1).write(0x28);
-    wait();
     Port(u8).init(0x21).write(0x04);
-    wait();
     Port(u8).init(0xA1).write(0x02);
-    wait();
     Port(u8).init(0x21).write(0x01);
-    wait();
     Port(u8).init(0xA1).write(0x01);
-    wait();
-
-    Port(u8).init(0x21).write(mask_master);
-    Port(u8).init(0xA1).write(mask_slave);
+    Port(u8).init(0x21).write(0x00);
+    Port(u8).init(0xA1).write(0x00);
 
     // Load default exceptions into idt
     idt_table[0] = GateDescriptor.init(@ptrToInt(isr0), 0x08, 0x8E);
