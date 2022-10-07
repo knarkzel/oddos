@@ -37,6 +37,10 @@ fn handler(_: isr.Registers) void {
         0x31 => if (lshift) Terminal.write("N") else Terminal.write("n"),
         0x32 => if (lshift) Terminal.write("M") else Terminal.write("m"),
         0x39 => Terminal.write(" "),
+        // 0xE0 => {
+        // const new = Port(u8).init(0x60).read();
+        // Terminal.write_hex(new);
+        // },
         0x1C => {
             Terminal.write("\n");
             Terminal.prompt();
@@ -44,9 +48,9 @@ fn handler(_: isr.Registers) void {
         0x2A => lshift = true,
         0xAA => lshift = false,
         else => {
-            // Terminal.write("[");
-            // Terminal.write_hex(scancode);
-            // Terminal.write("]");
+            Terminal.write("[");
+            Terminal.write_hex(scancode);
+            Terminal.write("]");
         },
     }
 }
