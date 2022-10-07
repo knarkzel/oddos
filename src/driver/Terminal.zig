@@ -119,6 +119,13 @@ pub fn moveCursor(x: u16, y: u16) void {
     vga_data.write(@intCast(u8, (position >> 8) & 0xFF));
 }
 
+pub fn delete() void {
+    if (column > 8)
+        column -= 1;
+    putCharAt(' ', color, column, row);
+    moveCursor(@intCast(u16, column), @intCast(u16, row));
+}
+
 const Position = struct {
     x: u16,
     y: u16,
@@ -134,6 +141,14 @@ pub fn getCursor() Position {
         .x = position % VGA_WIDTH,
         .y = position / VGA_WIDTH,
     };
+}
+
+pub fn prompt() void {
+    setColor(.Green, .Black);
+    write("oddos ");
+    setColor(.LightBlue, .Black);
+    write("> ");
+    setColor(.White, .Black);
 }
 
 fn vgaEntry(uc: u8, new_color: u8) u16 {

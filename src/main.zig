@@ -37,9 +37,5 @@ pub fn init() void {
 }
 
 pub fn main() void {
-    Terminal.setColor(.Green, .Black);
-    Terminal.write("oddos ");
-    Terminal.setColor(.LightBlue, .Black);
-    Terminal.write("> ");
-    Terminal.setColor(.White, .Black);
+    Terminal.prompt();
 }
