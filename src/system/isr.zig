@@ -34,15 +34,12 @@ pub const Registers = extern struct {
     ss: usize,
 };
 
-var interrupt_handlers: [256]?fn (Registers) void = undefined;
+var interrupt_handlers: [256]?fn (Registers) void = .{null} ** 256;
 
 pub fn set_handler(index: usize, handler: fn (Registers) void) void {
     interrupt_handlers[index] = handler;
 }
 
 pub fn get_handler(index: usize) ?fn (Registers) void {
-    if (interrupt_handlers[index]) |interrupt|
-        return interrupt
-    else
-        return null;
+    return interrupt_handlers[index];
 }

@@ -2,6 +2,7 @@ const gdt = @import("system/gdt.zig");
 const idt = @import("system/idt.zig");
 const isr = @import("system/isr.zig");
 const Port = @import("utils.zig").Port;
+const Timer = @import("driver/Timer.zig");
 const Serial = @import("driver/Serial.zig");
 const Terminal = @import("driver/Terminal.zig");
 
@@ -25,6 +26,8 @@ pub fn init() void {
     idt.init();
     Serial.init();
     Terminal.init();
+    Timer.init(10);
+    asm volatile ("sti");
 }
 
 pub fn main() void {
