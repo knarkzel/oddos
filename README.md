@@ -1,7 +1,7 @@
 # oddos
 
 ```shell
-git clone git@git.sr.ht:~knarkzel/oddos
+git clone https://github.com/knarkzel/oddos
 cd oddos
 nix develop
 zig build run
